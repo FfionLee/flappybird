@@ -8,6 +8,7 @@ screen=pygame.display.set_mode((860,820))
 
 bg=pygame.image.load('flappybg.png')
 ground=pygame.image.load('flappyground.png')
+restart=pygame.image.load('flappyrestart.png')
 
 clock=pygame.time.Clock()
 fps=60
@@ -83,6 +84,21 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right<0:
             self.kill()
 
+class Button():
+    def __init__(self,x,y):
+        self.image=restart
+        self.rect=self.image.get_rect()
+        self.rect.topleft=(x,y)
+
+    def draw(self):
+        action=False
+        pos=pygame.mouse.get_pos()
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0]==1:
+                action=True
+        screen.blit(self.image,(self.rect.x,self.rect.y))
+        return action
+
 birdgroup=pygame.sprite.Group()
 flappy=FlappyBird(100,400)
 birdgroup.add(flappy)
@@ -124,12 +140,22 @@ while playing:
 
     score_text=font.render('Score'+str(score),True,'white')
     screen.blit(score_text,(10,10))
-
+    if pygame.sprite.groupcollide(birdgroup,pipegroup,False,False):
+        gameover=True
+        restartbutton=Button(400,400)
     birdgroup.draw(screen)
     birdgroup.update()
 
     pipegroup.draw(screen)
     pipegroup.update()
+
+    if gameover==True:
+        if restartbutton.draw()==True:
+            gameover=False
+            flappy.rect.x=100
+            flappy.rect.y=400
+            score=0
+            pipegroup.empty()
 
     pygame.display.update()
     
